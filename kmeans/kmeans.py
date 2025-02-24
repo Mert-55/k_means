@@ -1,12 +1,5 @@
-from typing import Tuple, List, Set
-import sys
-from pathlib import Path
 import numpy as np
 from numpy import array
-
-k_means = sys.path.append(str(Path(__file__).parent.parent))
-
-from k_means.utils import OK
 
 
 class KMeans:
@@ -19,22 +12,20 @@ class KMeans:
         """
         self._centers = None
         self._points = None
-        self._center_designations: Set[str] = []
+        self._k: int = 3
 
     @staticmethod
-    def distance(point: array, centers: List[array]):
+    def distance(point: array, centers: list[array]):
         """
         Calculate the euclidian distances of all centers to one point
         """
         return np.sqrt(np.sum((centers - point) ** 2, axis=1))
 
     def match(self, iteration_limit: int = 180):
-        k = len(self._center_designations)
-
         self._centers = np.random.uniform(
-            np.amin(self._points, axis=0),
-            np.amax(self._points, axis=0),
-            size=(k, self._points.shape[1]),
+        np.amin(self._points, axis=0),
+        np.amax(self._points, axis=0),
+        size=(self._k, self._points.shape[1]),
         )
 
         y = []
@@ -49,7 +40,7 @@ class KMeans:
 
             # belonging_pts array in array with the length of k
             #cluster_indices = [choice for i in range(k) if (choice := np.argwhere(y == i))]
-            cluster_indices = [choice for i in range(k) if (choice := np.argwhere(y == i)).size > 0]
+            cluster_indices = [choice for i in range(self._k) if (choice := np.argwhere(y == i)).size > 0]
             
             # if cluster amount > centers then some cluster dont have belonging data points
             cluster_centers = [
@@ -67,7 +58,7 @@ class KMeans:
 
         return y
 
-    def add_points(self, *pts) -> OK | ValueError:
+    def add_points(self, *pts) -> None:
         """
         add one or more points
         Condition:
@@ -84,18 +75,6 @@ class KMeans:
 
             self._points.append(pt)
 
-        return OK
-
-    @property
-    def center_designations(self) -> List[str]:
-        return self._center_designations
-
-    @center_designations.setter
-    def center_designations(self, value: Set[str]) -> None:
-        """
-        set one or many unique designition for the CENTERS
-        """
-        self._center_designations = value
 
     @property
     def points(self):
